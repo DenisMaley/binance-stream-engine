@@ -1,0 +1,73 @@
+version: "2"
+services:
+  rabbit:
+    container_name: binanace-stream-rabbitmq
+    image: rabbitmq:3.7-management
+    ports:
+        - "15673:15672"
+    restart: always
+
+  redis:
+    container_name: binanace-stream-redis
+    image: redis
+    ports:
+      - "6380:6379"
+    command: [
+      "bash", "-c",
+      '
+         docker-entrypoint.sh
+         --requirepass password
+        '
+    ]
+    restart: always
+
+  listener:
+    container_name: binanace-stream-listener
+    build:
+      context: listener
+    depends_on:
+      - rabbit
+    ports:
+        - "8001:8000"
+    links:
+        - "rabbit:binanace-stream-rabbitmq"
+    environment:
+        RABBIT_PASSWORD: "guest"
+        RABBIT_USER: "guest"
+        RABBIT_HOST: "rabbit"
+        RABBIT_PORT: "5672"
+        RABBIT_MANAGEMENT_PORT: "15672"
+
+  logger:
+    container_name: binanace-stream-logger
+    build:
+      context: logger
+    depends_on:
+      - rabbit
+    ports:
+        - "8002:8000"
+    links:
+        - "rabbit:binanace-stream-rabbitmq"
+    environment:
+        RABBIT_PASSWORD: "guest"
+        RABBIT_USER: "guest"
+        RABBIT_HOST: "rabbit"
+        RABBIT_PORT: "5672"
+        RABBIT_MANAGEMENT_PORT: "15672"
+
+  gateway:
+    container_name: binanace-stream-gateway
+    build:
+      context: gateway
+    depends_on:
+      - rabbit
+    ports:
+      - "8003:8000"
+    links:
+      - "rabbit:binanace-stream-rabbitmq"
+    environment:
+      RABBIT_PASSWORD: "guest"
+      RABBIT_USER: "guest"
+      RABBIT_HOST: "rabbit"
+      RABBIT_PORT: "5672"
+      RABBIT_MANAGEMENT_PORT: "15672"

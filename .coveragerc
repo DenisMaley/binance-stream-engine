@@ -1,0 +1,13 @@
+[run]
+concurrency = eventlet
+
+omit =
+        */test/*
+        */setup.py
+
+source =
+	listener/listener
+	logger/logger
+
+[html]
+directory = htmlcov
