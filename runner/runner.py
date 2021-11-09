@@ -6,7 +6,8 @@ config = EnvYAML('config.yml')
 CC = 'bnbbtc'
 STREAM = 'depth'
 SPEED = '1000ms'
+LIMIT = 1000
 
 with ServiceRpcProxy('listener', config) as proxy:
-    socket = f'wss://stream.binance.com:9443/ws/{CC}@{STREAM}@{SPEED}'
-    proxy.start_stream(socket)
+    proxy.get_order_book(CC, LIMIT)
+    proxy.start_stream(CC, STREAM, SPEED)
