@@ -20,11 +20,12 @@ class ListenerService:
         self.order_book = defaultdict(list)
 
     def on_message(self, ws, message):
-        json_message = json.loads(message)
-        print(json_message)
+        order_details = json.loads(message)
+        self.dispatch('insert_orders', order_details)
+        print(order_details)
 
-    def on_close(self, ws):
-        print("Connection closed")
+    def on_close(self, ws, close_status_code, close_msg):
+        print(f"Connection closed: {close_status_code} - {close_msg}")
 
     @rpc
     def get_order_book(self, cc, limit):
@@ -43,5 +44,4 @@ class ListenerService:
 
     @rpc
     def log_trigger(self):
-        self.dispatch('log_records', self.order_book)
         self.order_book = defaultdict(list)
