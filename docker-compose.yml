@@ -2,9 +2,9 @@ version: "2"
 services:
   rabbit:
     container_name: binanace-stream-rabbitmq
-    image: rabbitmq:3.7-management
+    image: rabbitmq:3-management
     ports:
-        - "15673:15672"
+      - "15673:15672"
     restart: always
 
   redis:
@@ -28,15 +28,15 @@ services:
     depends_on:
       - rabbit
     ports:
-        - "8001:8000"
+      - "8001:8000"
     links:
-        - "rabbit:binanace-stream-rabbitmq"
+      - "rabbit:binanace-stream-rabbitmq"
     environment:
-        RABBIT_PASSWORD: "guest"
-        RABBIT_USER: "guest"
-        RABBIT_HOST: "rabbit"
-        RABBIT_PORT: "5672"
-        RABBIT_MANAGEMENT_PORT: "15672"
+      RABBIT_PASSWORD: "guest"
+      RABBIT_USER: "guest"
+      RABBIT_HOST: "rabbit"
+      RABBIT_PORT: "5672"
+      RABBIT_MANAGEMENT_PORT: "15672"
 
   logger:
     container_name: binanace-stream-logger
@@ -45,15 +45,15 @@ services:
     depends_on:
       - rabbit
     ports:
-        - "8002:8000"
+      - "8002:8000"
     links:
-        - "rabbit:binanace-stream-rabbitmq"
+      - "rabbit:binanace-stream-rabbitmq"
     environment:
-        RABBIT_PASSWORD: "guest"
-        RABBIT_USER: "guest"
-        RABBIT_HOST: "rabbit"
-        RABBIT_PORT: "5672"
-        RABBIT_MANAGEMENT_PORT: "15672"
+      RABBIT_PASSWORD: "guest"
+      RABBIT_USER: "guest"
+      RABBIT_HOST: "rabbit"
+      RABBIT_PORT: "5672"
+      RABBIT_MANAGEMENT_PORT: "15672"
 
   gateway:
     container_name: binanace-stream-gateway
@@ -63,6 +63,22 @@ services:
       - rabbit
     ports:
       - "8003:8000"
+    links:
+      - "rabbit:binanace-stream-rabbitmq"
+    environment:
+      RABBIT_PASSWORD: "guest"
+      RABBIT_USER: "guest"
+      RABBIT_HOST: "rabbit"
+      RABBIT_PORT: "5672"
+      RABBIT_MANAGEMENT_PORT: "15672"
+
+  runner:
+    container_name: binanace-stream-runner
+    build:
+      context: runner
+    depends_on:
+      - rabbit
+      - listener
     links:
       - "rabbit:binanace-stream-rabbitmq"
     environment:
