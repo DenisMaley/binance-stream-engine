@@ -1,14 +1,14 @@
 version: "2"
 services:
   rabbit:
-    container_name: binanace-stream-rabbitmq
+    container_name: binance-stream-rabbitmq
     image: rabbitmq:3-management
     ports:
       - "15673:15672"
     restart: always
 
   redis:
-    container_name: binanace-stream-redis
+    container_name: binance-stream-redis
     image: redis
     ports:
       - "6380:6379"
@@ -21,8 +21,21 @@ services:
     ]
     restart: always
 
+  postgres:
+    container_name: binance-stream-postgres
+    image: postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_HOST: "localhost"
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: "binance_stream_db"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_USER: "postgres"
+    restart: always
+
   listener:
-    container_name: binanace-stream-listener
+    container_name: binance-stream-listener
     build:
       context: listener
     depends_on:
@@ -30,7 +43,7 @@ services:
     ports:
       - "8001:8000"
     links:
-      - "rabbit:binanace-stream-rabbitmq"
+      - "rabbit:binance-stream-rabbitmq"
     environment:
       RABBIT_PASSWORD: "guest"
       RABBIT_USER: "guest"
@@ -39,16 +52,22 @@ services:
       RABBIT_MANAGEMENT_PORT: "15672"
 
   logger:
-    container_name: binanace-stream-logger
+    container_name: binance-stream-logger
     build:
       context: logger
     depends_on:
       - rabbit
+      - postgres
     ports:
       - "8002:8000"
     links:
-      - "rabbit:binanace-stream-rabbitmq"
+      - "rabbit:binance-stream-rabbitmq"
+      - "postgres:binance-stream-postgres"
     environment:
+      DB_PASSWORD: "password"
+      DB_USER: "postgres"
+      DB_HOST: "postgres"
+      DB_NAME: "binance_stream_db"
       RABBIT_PASSWORD: "guest"
       RABBIT_USER: "guest"
       RABBIT_HOST: "rabbit"
@@ -56,7 +75,7 @@ services:
       RABBIT_MANAGEMENT_PORT: "15672"
 
   gateway:
-    container_name: binanace-stream-gateway
+    container_name: binance-stream-gateway
     build:
       context: gateway
     depends_on:
@@ -64,7 +83,7 @@ services:
     ports:
       - "8003:8000"
     links:
-      - "rabbit:binanace-stream-rabbitmq"
+      - "rabbit:binance-stream-rabbitmq"
     environment:
       RABBIT_PASSWORD: "guest"
       RABBIT_USER: "guest"
@@ -73,14 +92,14 @@ services:
       RABBIT_MANAGEMENT_PORT: "15672"
 
   runner:
-    container_name: binanace-stream-runner
+    container_name: binance-stream-runner
     build:
       context: runner
     depends_on:
       - rabbit
       - listener
     links:
-      - "rabbit:binanace-stream-rabbitmq"
+      - "rabbit:binance-stream-rabbitmq"
     environment:
       RABBIT_PASSWORD: "guest"
       RABBIT_USER: "guest"
