@@ -18,22 +18,49 @@ class LoggerService:
     def build_orders(self, order_details):
         cc = order_details['s']
         orders = []
-        for type in ['a', 'b']:
-            for record in order_details[type]:
+        for o_type in ['a', 'b']:
+            for record in order_details[o_type]:
                 orders.append(
                     Order(
                         cc=cc,
-                        type=type,
-                        price=record[0],
-                        quantity=record[1],
+                        type=o_type,
+                        price=float(record[0]),
+                        quantity=float(record[1]),
                     )
                 )
 
         return orders
 
+    def build_orders_from_order_book(self, order_book_details):
+        cc = order_book_details['cc']
+        order_book = order_book_details['order_book']
+        orders = []
+        key_map = {'a': 'asks', 'b': 'bids'}
+        for o_type in ['a', 'b']:
+            ob_type = key_map[o_type]
+            for record in order_book[ob_type]:
+                orders.append(
+                    Order(
+                        cc=cc,
+                        type=o_type,
+                        price=float(record[0]),
+                        quantity=float(record[1]),
+                    )
+                )
+
+        return orders
+
+    @event_handler("listener", "insert_order_book")
+    def insert_order_book(self, order_book_details):
+        orders = self.build_orders_from_order_book(order_book_details)
+        self.bulk_save_orders(orders)
+
     @event_handler("listener", "insert_orders")
     def insert_orders(self, order_details):
         orders = self.build_orders(order_details)
+        self.bulk_save_orders(orders)
+
+    def bulk_save_orders(self, orders):
         self.db.bulk_save_objects(orders)
         self.db.commit()
 

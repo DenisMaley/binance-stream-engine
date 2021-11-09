@@ -34,7 +34,14 @@ class ListenerService:
             params=dict(symbol=cc.upper(), limit=limit)
         )
         order_book = response.json()
-        print(order_book)
+        self.dispatch(
+            'insert_order_book',
+            {'cc': cc, 'order_book': order_book}
+        )
+        print(
+            f"Order book received: {len(order_book['bids'])} bids "
+            f"and {len(order_book['asks'])} asks."
+        )
 
     @rpc
     def start_stream(self, cc, stream, speed):
