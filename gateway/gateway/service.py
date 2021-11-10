@@ -3,7 +3,9 @@ from nameko.rpc import RpcProxy
 from nameko.exceptions import BadRequest
 from werkzeug import Response
 
-from nameko.web.handlers import http
+from gateway.entrypoints import http
+from gateway.exceptions import OrderNotFound
+from gateway.schemas import GetOrderSchema
 
 
 class GatewayService:
@@ -32,6 +34,24 @@ class GatewayService:
             json.dumps(volume),
             mimetype='application/json'
         )
+
+    @http("GET", "/orders/<int:order_id>", expected_exceptions=OrderNotFound)
+    def get_order(self, request, order_id):
+        """Gets the order details for the order given by `order_id`.
+
+        Enhances the order details from the logger-service.
+        """
+        order = self._get_order(order_id)
+        return Response(
+            GetOrderSchema().dumps(order).data,
+            mimetype='application/json'
+        )
+
+    def _get_order(self, order_id):
+        # Note - this may raise a remote exception that has been mapped to
+        # raise``OrderNotFound``
+
+        return self.logger_rpc.get_order(order_id)
 
     def _get_volume(self, o_type, price, operator):
         # Retrieve volume from the logger service.
