@@ -19,6 +19,3 @@ test:
 	coverage run --append -m pytest logger/test $(ARGS)
 
 coverage: test coverage-report coverage-html
-
-log:
-	docker exec binance-stream-logger cat log.json
