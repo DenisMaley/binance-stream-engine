@@ -4,12 +4,12 @@ RUN apt-get update && apt-get -y install netcat && apt-get clean
 
 WORKDIR /app
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY config.yml ./
 COPY runner.py ./
+COPY config.yml ./
 COPY run.sh ./
+COPY setup.py ./
+
+RUN pip install -e .
 
 RUN chmod +x ./run.sh
 

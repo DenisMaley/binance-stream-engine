@@ -1,6 +1,0 @@
-nameko==2.14.0
-marshmallow==2.19.2
-pytest==4.5.0
-coverage==4.5.3
-flake8==4.0.1
-flake8-annotations==2.7.0
