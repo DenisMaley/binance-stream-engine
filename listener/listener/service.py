@@ -1,8 +1,6 @@
 import json
 import requests
 
-from collections import defaultdict
-
 from websocket import WebSocketApp
 from nameko.rpc import rpc
 from nameko.events import EventDispatcher
@@ -15,9 +13,6 @@ class ListenerService:
 
     ORDER_BOOK_ENDPOINT = 'https://api.binance.com/api/v3/depth'
     STREAM_SOCKET = 'wss://stream.binance.com:9443/ws/'
-
-    def __init__(self):
-        self.order_book = defaultdict(list)
 
     def on_message(self, ws, message):
         order_details = json.loads(message)
@@ -46,9 +41,9 @@ class ListenerService:
     @rpc
     def start_stream(self, cc, stream, speed):
         socket = f'{self.STREAM_SOCKET}{cc}@{stream}@{speed}'
-        ws = WebSocketApp(socket, on_message=self.on_message, on_close=self.on_close)
+        ws = WebSocketApp(
+            socket,
+            on_message=self.on_message,
+            on_close=self.on_close
+        )
         ws.run_forever()
-
-    @rpc
-    def log_trigger(self):
-        self.order_book = defaultdict(list)

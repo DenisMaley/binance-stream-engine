@@ -3,7 +3,8 @@ from nameko.testing.services import worker_factory
 from listener.service import ListenerService
 
 
-def test_log_trigger():
+def test_on_close(capsys):
     service = worker_factory(ListenerService)
-    service.log_trigger()
-    assert len(service.order_book) == 0
+    service.on_close(None, 500, 'test')
+    captured = capsys.readouterr()
+    assert captured.out == "Connection closed: 500 - test\n"
