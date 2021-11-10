@@ -19,13 +19,23 @@ class LoggerService:
     db = DatabaseSession(DeclarativeBase)
 
     @rpc
-    def get_volume(self, o_type):
+    def get_volume(self, o_type, price, operator):
         volume = self.db.query(
             func.sum(Order.quantity).label('volume'),
             func.sum(Order.price).label('total'),
         ).filter(
             Order.type == o_type
         )
+
+        if price and operator in ['eq', 'lte']:
+            if operator == 'eq':
+                volume = volume.filter(
+                    Order.price == price
+                )
+            elif operator == 'lte':
+                volume = volume.filter(
+                    Order.price <= price
+                )
 
         return VolumeSchema().dump(volume, many=True).data
 
