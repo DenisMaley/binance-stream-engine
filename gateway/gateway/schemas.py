@@ -1,5 +1,6 @@
 from marshmallow import Schema, fields
 
 
-class VolumeSchema(Schema):
-    amount = fields.Int(required=True)
+class GetVolumeSchema(Schema):
+    volume = fields.Float()
+    total = fields.Float()

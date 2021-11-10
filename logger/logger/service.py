@@ -5,7 +5,10 @@ from typing import Union
 from nameko.events import event_handler
 from nameko.rpc import rpc
 from nameko_sqlalchemy import DatabaseSession
+from sqlalchemy.sql import func
 
+from logger.exceptions import NotFound
+from logger.schemas import OrderSchema, VolumeSchema
 from logger.models import DeclarativeBase, Order
 
 
@@ -14,6 +17,26 @@ class LoggerService:
     name = 'logger'
 
     db = DatabaseSession(DeclarativeBase)
+
+    @rpc
+    def get_volume(self, o_type):
+        volume = self.db.query(
+            func.sum(Order.quantity).label('volume'),
+            func.sum(Order.price).label('total'),
+        ).filter(
+            Order.type == o_type
+        )
+
+        return VolumeSchema().dump(volume, many=True).data
+
+    @rpc
+    def get_order(self, order_id):
+        order = self.db.query(Order).get(order_id)
+
+        if not order:
+            raise NotFound('Order with id {} not found'.format(order_id))
+
+        return OrderSchema().dump(order).data
 
     def build_orders(self, order_details):
         cc = order_details['s']
