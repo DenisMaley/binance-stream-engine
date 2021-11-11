@@ -12,7 +12,7 @@ coverage-html:
 coverage-report:
 	coverage report -m
 
-test:
+test: install-dependencies
 	flake8 --ignore=ANN101,ANN201,ANN001,ANN204 listener logger
 	coverage run -m pytest gateway/test $(ARGS)
 	coverage run --append -m pytest listener/test $(ARGS)
