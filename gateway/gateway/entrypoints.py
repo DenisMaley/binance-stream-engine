@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 
 from marshmallow import ValidationError
 from nameko.exceptions import safe_for_serialization, BadRequest
@@ -13,19 +14,19 @@ class HttpEntrypoint(HttpRequestHandler):
     """
 
     mapped_errors = {
-        BadRequest: (400, 'BAD_REQUEST'),
-        ValidationError: (400, 'VALIDATION_ERROR'),
-        OrderNotFound: (404, 'ORDER_NOT_FOUND'),
+        BadRequest: (HTTPStatus.BAD_REQUEST, 'BAD_REQUEST'),
+        ValidationError: (HTTPStatus.BAD_REQUEST, 'VALIDATION_ERROR'),
+        OrderNotFound: (HTTPStatus.NOT_FOUND, 'ORDER_NOT_FOUND'),
     }
 
     def response_from_exception(self, exc):
-        status_code, error_code = 500, 'UNEXPECTED_ERROR'
+        status_code, error_code = HTTPStatus.INTERNAL_SERVER_ERROR, 'UNEXPECTED_ERROR'
 
         if isinstance(exc, self.expected_exceptions):
             if type(exc) in self.mapped_errors:
                 status_code, error_code = self.mapped_errors[type(exc)]
             else:
-                status_code = 400
+                status_code = HTTPStatus.BAD_REQUEST
                 error_code = 'BAD_REQUEST'
 
         return Response(

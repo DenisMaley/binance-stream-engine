@@ -1,5 +1,6 @@
 import json
 import pytest
+from http import HTTPStatus
 from marshmallow import ValidationError
 
 from gateway.entrypoints import HttpEntrypoint
@@ -11,10 +12,10 @@ class TestHttpEntrypoint(object):
     @pytest.mark.parametrize(
         ('exc', 'expected_error', 'expected_status_code',
             'expected_message'), [
-            (ValueError('unexpected'), 'UNEXPECTED_ERROR', 500, 'unexpected'),
-            (ValidationError('v1'), 'VALIDATION_ERROR', 400, 'v1'),
-            (OrderNotFound('o1'), 'ORDER_NOT_FOUND', 404, 'o1'),
-            (TypeError('t1'), 'BAD_REQUEST', 400, 't1'),
+            (ValueError('unexpected'), 'UNEXPECTED_ERROR', HTTPStatus.INTERNAL_SERVER_ERROR, 'unexpected'),
+            (ValidationError('v1'), 'VALIDATION_ERROR', HTTPStatus.BAD_REQUEST, 'v1'),
+            (OrderNotFound('o1'), 'ORDER_NOT_FOUND', HTTPStatus.NOT_FOUND, 'o1'),
+            (TypeError('t1'), 'BAD_REQUEST', HTTPStatus.BAD_REQUEST, 't1'),
         ]
     )
     def test_error_handling(

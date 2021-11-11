@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 from nameko.rpc import RpcProxy
 from nameko.exceptions import BadRequest
 from werkzeug import Response
@@ -32,6 +33,7 @@ class GatewayService:
         # TODO dump with GetVolumeSchema
         return Response(
             json.dumps(volume),
+            status=HTTPStatus.OK,
             mimetype='application/json'
         )
 
@@ -44,6 +46,7 @@ class GatewayService:
         order = self._get_order(order_id)
         return Response(
             GetOrderSchema().dumps(order).data,
+            status=HTTPStatus.OK,
             mimetype='application/json'
         )
 
